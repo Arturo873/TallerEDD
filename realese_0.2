@@ -1,0 +1,70 @@
+#include <opencv2/imgcodecs.hpp>
+#include <opencv2/highgui.hpp>
+#include <opencv2/imgproc.hpp>
+#include <opencv2/objdetect.hpp>
+#include <iostream>
+
+using namespace cv;
+using namespace std;
+
+//Nodo que almacenan caras de tipo Mat
+struct Nodo
+{
+	Mat dato;
+	Nodo* next;
+};
+void insertar(Nodo*&, Mat);
+
+//insertamos la nueva cara detectada al final
+void insertar(Nodo *&lista, Mat imagen) {
+	Nodo* nuevo_nodo = new Nodo();
+	Nodo* aux;
+	
+	nuevo_nodo->dato = imagen;
+	nuevo_nodo->next = NULL;
+
+	if (lista == NULL) {
+		lista = nuevo_nodo;
+	}else{
+		aux = lista;
+		while (aux->next != NULL) {
+			aux = aux->next;
+		}
+		aux->next = nuevo_nodo;
+	}
+}
+void main() {
+	
+	//video de ejemplo
+	string path = "C:\\Users\\nacho\\Desktop\\reconocimiento facial\\video.mp4";
+	VideoCapture cap(path);
+
+	//VideoCapture cap(0); //El video proviene de la webcam 0
+	
+	Mat img; 
+	Nodo* lista = NULL;
+	while (true) {
+		cap.read(img);
+		CascadeClassifier faceCascade;
+		faceCascade.load("Resources/haarcascade_frontalface_default.xml");
+
+		// si no existe el archivo
+		if (faceCascade.empty()) { cout << "XML file not loaded" << endl; } 
+
+		//detectamos las caras
+		vector<Rect> faces;
+		faceCascade.detectMultiScale(img, faces, 1.1, 10);
+
+		
+		for (int i = 0; i < faces.size(); i++) {
+			rectangle(img,faces[i].tl(), faces[i].br(), Scalar(255, 0, 255), 3);
+			//usamos la deteccion de caras para almacenarlas.
+			insertar(lista, img);
+			imshow("detectado", img);//comprobador de caras detectadas
+			
+		}
+		imshow("Camara", img);
+		waitKey(10);
+	}
+	
+}//*/
